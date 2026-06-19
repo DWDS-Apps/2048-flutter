@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/game_state.dart';
 import '../themes/app_theme.dart';
 
 class TileWidget extends StatelessWidget {

@@ -13,8 +13,7 @@ class GameBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final size = constraints.maxWidth;
-      final cellSize = (size - 5 * 8) / 4;
-      final tileSize = cellSize;
+      final tileSize = (size - 5 * 8) / 4;
 
       return GestureDetector(
         onHorizontalDragEnd: (details) {
@@ -43,37 +42,34 @@ class GameBoard extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           child: Stack(
             children: [
-              ...List.generate(4, (r) => List.generate(4, (c) {
-                return Positioned(
-                  left: 8 + c * (tileSize + 8),
-                  top: 8 + r * (tileSize + 8),
-                  child: Container(
-                    width: tileSize,
-                    height: tileSize,
-                    decoration: BoxDecoration(
-                      color: AppTheme.cellBackground,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                );
-              })),
-              ...grid.asMap().entries.expand((rowEntry) {
-                final r = rowEntry.key;
-                return rowEntry.value.asMap().entries.where((e) => e.value != null).map((cellEntry) {
-                  final c = cellEntry.key;
-                  return AnimatedPositioned(
-                    duration: const Duration(milliseconds: 100),
-                    curve: Curves.easeInOut,
+              for (int r = 0; r < 4; r++)
+                for (int c = 0; c < 4; c++)
+                  Positioned(
                     left: 8 + c * (tileSize + 8),
                     top: 8 + r * (tileSize + 8),
-                    child: SizedBox(
+                    child: Container(
                       width: tileSize,
                       height: tileSize,
-                      child: TileWidget(value: grid[r][c]),
+                      decoration: BoxDecoration(
+                        color: AppTheme.cellBackground,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                     ),
-                  );
-                });
-              }),
+                  ),
+              for (int r = 0; r < 4; r++)
+                for (int c = 0; c < 4; c++)
+                  if (grid[r][c] != null)
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 100),
+                      curve: Curves.easeInOut,
+                      left: 8 + c * (tileSize + 8),
+                      top: 8 + r * (tileSize + 8),
+                      child: SizedBox(
+                        width: tileSize,
+                        height: tileSize,
+                        child: TileWidget(value: grid[r][c]),
+                      ),
+                    ),
             ],
           ),
         ),

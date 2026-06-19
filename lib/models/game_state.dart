@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class TileData {
   final int value;
   final int row;
