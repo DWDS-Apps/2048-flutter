@@ -55,6 +55,9 @@ class _GameScreenState extends State<GameScreen> {
 
   void _handleSwipe(Direction direction) {
     if (_animating) return;
+    final state = _controller.state;
+    if (state.gameOver) return;
+    if (state.won && !state.keepPlaying) return;
     _animating = true;
     _controller.handleSwipe(direction);
 
@@ -66,6 +69,8 @@ class _GameScreenState extends State<GameScreen> {
       // Movement but no merge — just play swipe sound
       _soundService.playSwipe();
     }
+    // New tile appears on every successful move
+    _soundService.playNewTile();
 
     _saveBestScore();
     // Save to leaderboard on game over if score > 0
