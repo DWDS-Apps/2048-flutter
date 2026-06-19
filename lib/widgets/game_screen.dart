@@ -2,30 +2,46 @@ import 'package:flutter/material.dart';
 import '../controllers/game_controller.dart';
 import '../models/game_state.dart';
 import '../services/storage_service.dart';
+import '../services/sound_service.dart';
 import '../themes/app_theme.dart';
 import 'game_board.dart';
 import 'game_overlay.dart';
+import 'leaderboard_screen.dart';
 import 'score_board.dart';
 
 class GameScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
   final bool isDark;
+  final int gridSize;
 
-  const GameScreen({super.key, required this.onToggleTheme, required this.isDark});
+  const GameScreen({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDark,
+    this.gridSize = 4,
+  });
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final GameController _controller = GameController();
+  late final GameController _controller;
   final StorageService _storage = StorageService();
+  final SoundService _soundService = SoundService();
   bool _animating = false;
 
   @override
   void initState() {
     super.initState();
+    _controller = GameController(gridSize: widget.gridSize);
     _loadBestScore();
+  }
+
+  @override
+  void dispose() {
+    _soundService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadBestScore() async {
@@ -41,19 +57,55 @@ class _GameScreenState extends State<GameScreen> {
     if (_animating) return;
     _animating = true;
     _controller.handleSwipe(direction);
+
+    // Play sound effects based on what happened
+    if (_controller.state.lastScoreGained > 0) {
+      // A merge happened — play merge sound
+      _soundService.playMerge();
+    } else {
+      // Movement but no merge — just play swipe sound
+      _soundService.playSwipe();
+    }
+
     _saveBestScore();
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) setState(() => _animating = false);
+    // Save to leaderboard on game over if score > 0
+    if (_controller.state.gameOver && _controller.state.score > 0) {
+      _saveToLeaderboard();
+    }
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        _controller.clearAnimationFlags();
+        setState(() => _animating = false);
+      }
     });
   }
 
+  Future<void> _saveToLeaderboard() async {
+    final now = DateTime.now();
+    final dateStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    await _storage.addLeaderboardEntry(
+      LeaderboardEntry(
+        score: _controller.state.score,
+        date: dateStr,
+        gridSize: widget.gridSize,
+      ),
+    );
+  }
+
   void _resetGame() {
+    // Save to leaderboard before reset if score > 0
+    if (_controller.state.score > 0) {
+      // Fire-and-forget — save completes in background
+      _saveToLeaderboard();
+    }
     _controller.reset();
     _saveBestScore();
   }
 
   void _undo() {
+    if (_animating) return;
     _controller.undo();
+    _saveBestScore();
   }
 
   @override
@@ -67,6 +119,17 @@ class _GameScreenState extends State<GameScreen> {
             title: const Text('2048'),
             centerTitle: true,
             actions: [
+              IconButton(
+                icon: const Icon(Icons.emoji_events),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LeaderboardScreen(),
+                    ),
+                  );
+                },
+              ),
               IconButton(
                 icon: Icon(widget.isDark ? Icons.light_mode : Icons.dark_mode),
                 onPressed: widget.onToggleTheme,
@@ -101,8 +164,9 @@ class _GameScreenState extends State<GameScreen> {
                     child: Stack(
                       children: [
                         GameBoard(
-                          grid: state.grid,
+                          tiles: state.renderTiles,
                           onSwipe: _handleSwipe,
+                          gridSize: widget.gridSize,
                         ),
                         GameOverlay(
                           won: state.won && !state.keepPlaying,

@@ -1,4 +1,5 @@
 class TileData {
+  final int id;
   final int value;
   final int row;
   final int col;
@@ -7,6 +8,7 @@ class TileData {
   final int mergeGroup;
 
   const TileData({
+    required this.id,
     required this.value,
     required this.row,
     required this.col,
@@ -16,6 +18,7 @@ class TileData {
   });
 
   TileData copyWith({
+    int? id,
     int? value,
     int? row,
     int? col,
@@ -24,6 +27,7 @@ class TileData {
     int? mergeGroup,
   }) {
     return TileData(
+      id: id ?? this.id,
       value: value ?? this.value,
       row: row ?? this.row,
       col: col ?? this.col,
@@ -36,39 +40,54 @@ class TileData {
 
 class MoveRecord {
   final List<List<int?>> grid;
+  final List<List<int?>> tileIds;
   final int score;
 
-  const MoveRecord({required this.grid, required this.score});
+  const MoveRecord({required this.grid, required this.tileIds, required this.score});
 
   List<List<int?>> cloneGrid() {
     return grid.map((row) => row.toList()).toList();
   }
+
+  List<List<int?>> cloneTileIds() {
+    return tileIds.map((row) => row.toList()).toList();
+  }
 }
 
 class GameState {
+  final int gridSize;
   List<List<int?>> grid;
+  List<List<int?>> tileIds;
   int score;
   int bestScore;
   bool gameOver;
   bool won;
   bool keepPlaying;
   MoveRecord? history;
+  List<TileData> renderTiles;
+  int lastScoreGained;
 
   GameState({
+    this.gridSize = 4,
     List<List<int?>>? grid,
+    List<List<int?>>? tileIds,
     this.score = 0,
     this.bestScore = 0,
     this.gameOver = false,
     this.won = false,
     this.keepPlaying = false,
     this.history,
-  }) : grid = grid ?? List.generate(4, (_) => List<int?>.filled(4, null));
-
-  static const int gridSize = 4;
+    List<TileData>? renderTiles,
+    this.lastScoreGained = 0,
+  })  : grid = grid ?? List.generate(gridSize, (_) => List<int?>.filled(gridSize, null)),
+        tileIds = tileIds ?? List.generate(gridSize, (_) => List<int?>.filled(gridSize, null)),
+        renderTiles = renderTiles ?? [];
 
   GameState clone() {
     return GameState(
+      gridSize: gridSize,
       grid: grid.map((row) => row.toList()).toList(),
+      tileIds: tileIds.map((row) => row.toList()).toList(),
       score: score,
       bestScore: bestScore,
       gameOver: gameOver,
@@ -77,9 +96,12 @@ class GameState {
       history: history != null
           ? MoveRecord(
               grid: history!.grid.map((r) => r.toList()).toList(),
+              tileIds: history!.tileIds.map((r) => r.toList()).toList(),
               score: history!.score,
             )
           : null,
+      renderTiles: List.from(renderTiles),
+      lastScoreGained: lastScoreGained,
     );
   }
 
@@ -116,17 +138,10 @@ class GameState {
     return false;
   }
 
-  List<TileData> get tiles {
-    final tiles = <TileData>[];
-    for (int r = 0; r < gridSize; r++) {
-      for (int c = 0; c < gridSize; c++) {
-        final v = grid[r][c];
-        if (v != null) {
-          tiles.add(TileData(value: v, row: r, col: c));
-        }
-      }
-    }
-    return tiles;
+  void clearAnimationFlags() {
+    renderTiles = renderTiles
+        .map((t) => t.copyWith(isNew: false, isMerged: false))
+        .toList();
   }
 }
 
@@ -153,7 +168,7 @@ class SlideResult {
   const SlideResult({required this.line, required this.score, required this.moved});
 }
 
-SlideResult slideLine(List<int?> line) {
+SlideResult slideLine(List<int?> line, {int size = 4}) {
   final filtered = line.where((v) => v != null).toList();
   bool moved = false;
   int score = 0;
@@ -173,14 +188,14 @@ SlideResult slideLine(List<int?> line) {
     }
   }
 
-  while (result.length < 4) {
+  while (result.length < size) {
     result.add(0);
   }
 
   final finalLine = result.map((v) => v == 0 ? null : v).toList();
 
   if (!moved) {
-    for (int j = 0; j < 4; j++) {
+    for (int j = 0; j < size; j++) {
       if (line[j] != finalLine[j]) {
         moved = true;
         break;

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../themes/app_theme.dart';
 import '../services/storage_service.dart';
+import 'leaderboard_screen.dart';
 
 class MenuScreen extends StatefulWidget {
-  final VoidCallback onPlay;
+  final void Function(int gridSize) onPlay;
 
   const MenuScreen({super.key, required this.onPlay});
 
@@ -14,6 +15,9 @@ class MenuScreen extends StatefulWidget {
 class _MenuScreenState extends State<MenuScreen> {
   final StorageService _storage = StorageService();
   int _bestScore = 0;
+  int _gridSize = 4;
+
+  static const List<int> _sizeOptions = [4, 5, 6];
 
   @override
   void initState() {
@@ -49,9 +53,36 @@ class _MenuScreenState extends State<MenuScreen> {
                 color: AppTheme.boardBackground,
               ),
             ),
+            const SizedBox(height: 32),
+            Text(
+              'Board Size',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.darkText,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 4, label: Text('4×4')),
+                ButtonSegment(value: 5, label: Text('5×5')),
+                ButtonSegment(value: 6, label: Text('6×6')),
+              ],
+              selected: {_gridSize},
+              onSelectionChanged: (Set<int> selected) {
+                setState(() => _gridSize = selected.first);
+              },
+              style: SegmentedButton.styleFrom(
+                selectedBackgroundColor: AppTheme.boardBackground,
+                selectedForegroundColor: Colors.white,
+                foregroundColor: AppTheme.darkText,
+                backgroundColor: AppTheme.cellBackground,
+              ),
+            ),
             const SizedBox(height: 48),
             ElevatedButton(
-              onPressed: widget.onPlay,
+              onPressed: () => widget.onPlay(_gridSize),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.boardBackground,
                 foregroundColor: Colors.white,
@@ -63,6 +94,23 @@ class _MenuScreenState extends State<MenuScreen> {
               child: const Text(
                 'Play',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LeaderboardScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.emoji_events),
+              label: const Text('Leaderboard'),
+              style: TextButton.styleFrom(
+                foregroundColor: AppTheme.boardBackground,
+                textStyle: const TextStyle(fontSize: 16),
               ),
             ),
           ],

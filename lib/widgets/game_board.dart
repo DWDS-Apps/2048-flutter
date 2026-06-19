@@ -4,16 +4,23 @@ import '../themes/app_theme.dart';
 import 'tile_widget.dart';
 
 class GameBoard extends StatelessWidget {
-  final List<List<int?>> grid;
+  final List<TileData> tiles;
   final void Function(Direction) onSwipe;
+  final int gridSize;
 
-  const GameBoard({super.key, required this.grid, required this.onSwipe});
+  const GameBoard({
+    super.key,
+    required this.tiles,
+    required this.onSwipe,
+    this.gridSize = 4,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final size = constraints.maxWidth;
-      final tileSize = (size - 5 * 8) / 4;
+      final gutter = 8.0;
+      final tileSize = (size - (gridSize + 1) * gutter) / gridSize;
 
       return GestureDetector(
         onHorizontalDragEnd: (details) {
@@ -32,21 +39,43 @@ class GameBoard extends StatelessWidget {
             onSwipe(Direction.up);
           }
         },
-        child: Container(
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent || event is KeyRepeatEvent) {
+              final key = event.logicalKey;
+              if (key == LogicalKeyboardKey.arrowLeft) {
+                onSwipe(Direction.left);
+                return KeyEventResult.handled;
+              } else if (key == LogicalKeyboardKey.arrowRight) {
+                onSwipe(Direction.right);
+                return KeyEventResult.handled;
+              } else if (key == LogicalKeyboardKey.arrowUp) {
+                onSwipe(Direction.up);
+                return KeyEventResult.handled;
+              } else if (key == LogicalKeyboardKey.arrowDown) {
+                onSwipe(Direction.down);
+                return KeyEventResult.handled;
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
             color: AppTheme.boardBackground,
             borderRadius: BorderRadius.circular(6),
           ),
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(gutter),
           child: Stack(
             children: [
-              for (int r = 0; r < 4; r++)
-                for (int c = 0; c < 4; c++)
+              // Grid background cells
+              for (int r = 0; r < gridSize; r++)
+                for (int c = 0; c < gridSize; c++)
                   Positioned(
-                    left: 8 + c * (tileSize + 8),
-                    top: 8 + r * (tileSize + 8),
+                    left: gutter + c * (tileSize + gutter),
+                    top: gutter + r * (tileSize + gutter),
                     child: Container(
                       width: tileSize,
                       height: tileSize,
@@ -56,20 +85,24 @@ class GameBoard extends StatelessWidget {
                       ),
                     ),
                   ),
-              for (int r = 0; r < 4; r++)
-                for (int c = 0; c < 4; c++)
-                  if (grid[r][c] != null)
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 100),
-                      curve: Curves.easeInOut,
-                      left: 8 + c * (tileSize + 8),
-                      top: 8 + r * (tileSize + 8),
-                      child: SizedBox(
-                        width: tileSize,
-                        height: tileSize,
-                        child: TileWidget(value: grid[r][c]),
-                      ),
+              // Tiles with animated positioning
+              for (final tile in tiles)
+                AnimatedPositioned(
+                  key: ValueKey('tile_${tile.id}'),
+                  duration: const Duration(milliseconds: 100),
+                  curve: Curves.easeInOut,
+                  left: gutter + tile.col * (tileSize + gutter),
+                  top: gutter + tile.row * (tileSize + gutter),
+                  child: SizedBox(
+                    width: tileSize,
+                    height: tileSize,
+                    child: TileWidget(
+                      value: tile.value,
+                      isNew: tile.isNew,
+                      isMerged: tile.isMerged,
                     ),
+                  ),
+                ),
             ],
           ),
         ),

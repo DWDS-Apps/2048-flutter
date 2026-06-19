@@ -15,6 +15,8 @@ class ScoreBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isBest = label == 'Best';
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -33,20 +35,30 @@ class ScoreBoard extends StatelessWidget {
               letterSpacing: 1,
             ),
           ),
-          TweenAnimationBuilder<int>(
-            tween: IntTween(begin: 0, end: score),
-            duration: const Duration(milliseconds: 200),
-            builder: (context, value, child) {
-              return Text(
-                '$value',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
-          ),
+          if (isBest)
+            Text(
+              '$score',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          else
+            TweenAnimationBuilder<int>(
+              tween: IntTween(begin: score, end: score),
+              duration: const Duration(milliseconds: 200),
+              builder: (context, value, child) {
+                return Text(
+                  '$value',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
