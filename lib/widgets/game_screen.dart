@@ -58,8 +58,21 @@ class _GameScreenState extends State<GameScreen> {
     final state = _controller.state;
     if (state.gameOver) return;
     if (state.won && !state.keepPlaying) return;
+
+    // Save pre-move history reference to detect actual movement
+    // The controller only writes a new MoveRecord when tiles actually move
+    final previousHistory = state.history;
+
     _animating = true;
     _controller.handleSwipe(direction);
+
+    // Check if anything actually moved (controller sets a new history object)
+    final moved = state.history != previousHistory;
+    if (!moved) {
+      // No movement — cancel animation lock silently, no sounds
+      setState(() => _animating = false);
+      return;
+    }
 
     // Play sound effects based on what happened
     if (_controller.state.lastScoreGained > 0) {

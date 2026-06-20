@@ -37,7 +37,7 @@ A feature-rich clone of the classic **2048 puzzle game** built with Flutter. Sli
 |-------------|-------------|-----------|-------------|
 | <img src="docs/screenshots/menu.png" alt="Menu" width="200"/> | <img src="docs/screenshots/game.png" alt="Game" width="200"/> | <img src="docs/screenshots/gameover.png" alt="Game Over" width="200"/> | <img src="docs/screenshots/leaderboard.png" alt="Leaderboard" width="200"/> |
 
-*(Screenshots — capture these from a running device and place in `docs/screenshots/`)*
+*(Placeholder screenshots — replace with actual device captures for best quality)*
 
 ## Getting Started
 
