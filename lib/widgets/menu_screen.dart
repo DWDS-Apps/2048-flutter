@@ -32,6 +32,10 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : AppTheme.darkText;
+    final mutedColor = isDark ? Colors.white70 : AppTheme.boardBackground;
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -42,7 +46,7 @@ class _MenuScreenState extends State<MenuScreen> {
               style: TextStyle(
                 fontSize: 72,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.darkText,
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -50,7 +54,7 @@ class _MenuScreenState extends State<MenuScreen> {
               'Best: $_bestScore',
               style: TextStyle(
                 fontSize: 20,
-                color: AppTheme.boardBackground,
+                color: mutedColor,
               ),
             ),
             const SizedBox(height: 32),
@@ -59,7 +63,7 @@ class _MenuScreenState extends State<MenuScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.darkText,
+                color: titleColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -76,8 +80,8 @@ class _MenuScreenState extends State<MenuScreen> {
               style: SegmentedButton.styleFrom(
                 selectedBackgroundColor: AppTheme.boardBackground,
                 selectedForegroundColor: Colors.white,
-                foregroundColor: AppTheme.darkText,
-                backgroundColor: AppTheme.cellBackground,
+                foregroundColor: isDark ? Colors.white70 : AppTheme.darkText,
+                backgroundColor: isDark ? AppTheme.darkCellBackground : AppTheme.cellBackground,
               ),
             ),
             const SizedBox(height: 48),
@@ -106,10 +110,9 @@ class _MenuScreenState extends State<MenuScreen> {
                   ),
                 );
               },
-              icon: const Icon(Icons.emoji_events),
-              label: const Text('Leaderboard'),
+              icon: Icon(Icons.emoji_events, color: mutedColor),
+              label: Text('Leaderboard', style: TextStyle(color: mutedColor)),
               style: TextButton.styleFrom(
-                foregroundColor: AppTheme.boardBackground,
                 textStyle: const TextStyle(fontSize: 16),
               ),
             ),

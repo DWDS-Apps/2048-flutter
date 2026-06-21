@@ -30,6 +30,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Leaderboard'),
@@ -38,11 +39,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       body: !_loaded
           ? const Center(child: CircularProgressIndicator())
           : _entries.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
                     'No scores yet!\nPlay a game to set your first record.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: isDark ? Colors.white70 : null),
                   ),
                 )
               : ListView.builder(
@@ -61,15 +62,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         ),
                         title: Text(
                           '${entry.score}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.darkText,
+                            color: isDark ? Colors.white : AppTheme.darkText,
                           ),
                         ),
                         subtitle: Text(
                           '${entry.gridSize}×${entry.gridSize} • ${entry.date}',
-                          style: TextStyle(color: AppTheme.boardBackground),
+                          style: TextStyle(color: isDark ? Colors.white60 : AppTheme.boardBackground),
                         ),
                         trailing: Icon(
                           Icons.emoji_events,

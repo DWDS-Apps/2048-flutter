@@ -112,7 +112,7 @@ class _TileWidgetState extends State<TileWidget>
               style: TextStyle(
                 fontSize: AppTheme.tileFontSize(widget.value),
                 fontWeight: FontWeight.bold,
-                color: AppTheme.tileTextColor(widget.value),
+                color: AppTheme.tileTextColor(widget.value, brightness: Theme.of(context).brightness),
               ),
             )
           : null,

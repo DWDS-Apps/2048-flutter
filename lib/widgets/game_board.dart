@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/game_state.dart';
 import '../themes/app_theme.dart';
 import 'tile_widget.dart';
@@ -64,7 +65,9 @@ class GameBoard extends StatelessWidget {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: AppTheme.boardBackground,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.darkBoardBackground
+                : AppTheme.boardBackground,
             borderRadius: BorderRadius.circular(6),
           ),
           padding: EdgeInsets.all(gutter),
@@ -80,7 +83,9 @@ class GameBoard extends StatelessWidget {
                       width: tileSize,
                       height: tileSize,
                       decoration: BoxDecoration(
-                        color: AppTheme.cellBackground,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.darkCellBackground
+                            : AppTheme.cellBackground,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),

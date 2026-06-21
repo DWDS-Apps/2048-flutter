@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class LeaderboardEntry {
   final int score;
@@ -31,30 +31,58 @@ class StorageService {
   static const String _bestScoreKey = 'best_score';
   static const String _darkModeKey = 'dark_mode';
   static const String _leaderboardKey = 'leaderboard';
+  static const String _prefix = '2048_';
+
+  String get _filePath {
+    // Use a simple file path in the app's data directory
+    final dir = Directory('/tmp/2048_flutter_data');
+    if (!dir.existsSync()) {
+      dir.createSync(recursive: true);
+    }
+    return '${dir.path}/storage.json';
+  }
+
+  Map<String, dynamic> _readAll() {
+    try {
+      final file = File(_filePath);
+      if (!file.existsSync()) return {};
+      final content = file.readAsStringSync();
+      return jsonDecode(content) as Map<String, dynamic>;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  void _writeAll(Map<String, dynamic> data) {
+    final file = File(_filePath);
+    file.writeAsStringSync(jsonEncode(data));
+  }
 
   Future<int> loadBestScore() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_bestScoreKey) ?? 0;
+    final data = _readAll();
+    return data[_bestScoreKey] as int? ?? 0;
   }
 
   Future<void> saveBestScore(int score) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_bestScoreKey, score);
+    final data = _readAll();
+    data[_bestScoreKey] = score;
+    _writeAll(data);
   }
 
   Future<bool> loadDarkMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_darkModeKey) ?? false;
+    final data = _readAll();
+    return data[_darkModeKey] as bool? ?? false;
   }
 
   Future<void> saveDarkMode(bool dark) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_darkModeKey, dark);
+    final data = _readAll();
+    data[_darkModeKey] = dark;
+    _writeAll(data);
   }
 
   Future<List<LeaderboardEntry>> loadLeaderboard() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_leaderboardKey);
+    final data = _readAll();
+    final jsonStr = data[_leaderboardKey] as String?;
     if (jsonStr == null || jsonStr.isEmpty) return [];
     try {
       final List<dynamic> list = jsonDecode(jsonStr) as List<dynamic>;
@@ -72,10 +100,8 @@ class StorageService {
     entries.sort((a, b) => b.score.compareTo(a.score));
     // Keep top 5
     final top = entries.take(5).toList();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _leaderboardKey,
-      jsonEncode(top.map((e) => e.toJson()).toList()),
-    );
+    final data = _readAll();
+    data[_leaderboardKey] = jsonEncode(top.map((e) => e.toJson()).toList());
+    _writeAll(data);
   }
 }

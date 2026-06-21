@@ -16,10 +16,14 @@ class AppTheme {
 
   static const Color lightText = Color(0xFFf9f6f2);
   static const Color darkText = Color(0xFF776e65);
+  static const Color darkTextDarkMode = Color(0xFFaa9e91);
 
   static const Color boardBackground = Color(0xFFbbada0);
   static const Color cellBackground = Color(0xFFcdc1b4);
   static const Color gameBackground = Color(0xFFfaf8ef);
+  static const Color darkBoardBackground = Color(0xFF2d2d44);
+  static const Color darkCellBackground = Color(0xFF3d3d54);
+  static const Color darkGameBackground = Color(0xFF1a1a2e);
 
   static Color tileColor(int? value) {
     return switch (value) {
@@ -39,9 +43,13 @@ class AppTheme {
     };
   }
 
-  static Color tileTextColor(int? value) {
+  static Color tileTextColor(int? value, {Brightness brightness = Brightness.light}) {
     if (value == null) return Colors.transparent;
-    return value <= 4 ? darkText : lightText;
+    if (value <= 4) {
+      // On light tile backgrounds, use a lighter warm brown in dark mode
+      return brightness == Brightness.dark ? darkTextDarkMode : darkText;
+    }
+    return lightText;
   }
 
   static double tileFontSize(int? value) {
@@ -69,15 +77,18 @@ class AppTheme {
 
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF1a1a2e),
+    scaffoldBackgroundColor: darkGameBackground,
     colorScheme: ColorScheme.dark(
-      primary: const Color(0xFFbbada0),
+      primary: boardBackground,
       onPrimary: Colors.white,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFF1a1a2e),
+      backgroundColor: darkGameBackground,
       foregroundColor: Colors.white,
       elevation: 0,
+    ),
+    cardTheme: const CardThemeData(
+      color: Color(0xFF2d2d44),
     ),
   );
 }

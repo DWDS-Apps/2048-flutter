@@ -206,12 +206,13 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Widget _buildButton(String label, VoidCallback onPressed, bool disabled) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ElevatedButton(
       onPressed: disabled ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppTheme.boardBackground,
+        backgroundColor: isDark ? AppTheme.darkCellBackground : AppTheme.boardBackground,
         foregroundColor: Colors.white,
-        disabledBackgroundColor: Colors.grey.shade400,
+        disabledBackgroundColor: isDark ? Colors.grey.shade700 : Colors.grey.shade400,
         disabledForegroundColor: Colors.grey.shade200,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),

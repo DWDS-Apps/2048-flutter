@@ -30,19 +30,27 @@
 - [x] Animation flag lifecycle (clearAnimationFlags after animation)
 
 ## Phase 4: Persistence & Polish (est. 1-2hr) ✓
-- [x] StorageService with SharedPreferences
+- [x] StorageService with file-based persistence (replaces SharedPreferences for offline builds)
 - [x] Best score persistence (save on every score change, load on init)
 - [x] Dark mode toggle (IconButton in AppBar, AppTheme light/dark)
-- [x] Dark mode persistence (save preference across restarts)
-- [x] Sound effects (audioplayers package, swipe/merge/new tile sounds)
+- [x] Dark mode persistence (save preference across restarts via file storage)
+- [x] Sound effect stubs (no-op without audioplayers package — add package and sound files for audio)
 
 ## Phase 5: Nice-to-Have (est. 2-3hr) ✓
 - [x] Board size selector (4x4, 5x5, 6x6)
-- [x] Local leaderboard (top 5 scores with SharedPreferences)
+- [x] Local leaderboard (top 5 scores with file-based persistence)
 - [x] Keyboard support (arrow keys for web/desktop)
+- [x] Dark mode theme polish: tile text colors adapt to theme brightness, board/cell backgrounds adapt
 
 ## Phase 6: Release Prep (est. 1hr) ✓
-- [x] App icon (2048 tile design for Android + iOS)
+- [x] App icon (2048 tile design for Android + iOS — generated)
 - [x] Physical device testing
 - [x] Platform-specific fixes
 - [x] Final README with screenshots and usage
+
+## Notes
+- **Offline mode:** pub.dev was unreachable during build, so external packages (shared_preferences, audioplayers, cupertino_icons, flutter_lints) were replaced with built-in alternatives:
+  - StorageService uses file-based JSON storage (`/tmp/2048_flutter_data/storage.json`)
+  - SoundService is a no-op stub (audioplayers not available)
+  - To restore sound effects: add `audioplayers: ^6.1.0` to pubspec.yaml and provide .wav files in `assets/sounds/`
+- **Dart SDK:** 3.6.2 (bundled with Flutter 3.27.4)

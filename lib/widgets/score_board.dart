@@ -15,12 +15,13 @@ class ScoreBoard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bool isBest = label == 'Best';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: AppTheme.boardBackground,
+        color: isDark ? AppTheme.darkBoardBackground : AppTheme.boardBackground,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
