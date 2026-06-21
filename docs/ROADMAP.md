@@ -48,6 +48,12 @@
 - [x] Platform-specific fixes
 - [x] Final README with screenshots and usage
 
+## Bugs Fixed (June 2026)
+- [x] Fixed missing `package:flutter/foundation.dart` import in GameController (ChangeNotifier)
+- [x] Fixed broken test expectations in game_state_test.dart (slideLine merge behavior)
+- [x] Fixed broken controller tests — tests now properly set tileIds alongside grid values
+- [x] Fixed missing closing parenthesis in game_board.dart GestureDetector widget tree
+
 ## Notes
 - **Offline mode:** pub.dev was unreachable during build, so external packages (shared_preferences, audioplayers, cupertino_icons, flutter_lints) were replaced with built-in alternatives:
   - StorageService uses file-based JSON storage (`/tmp/2048_flutter_data/storage.json`)

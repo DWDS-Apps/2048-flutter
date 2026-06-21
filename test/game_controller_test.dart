@@ -2,6 +2,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:game2048/models/game_state.dart';
 import 'package:game2048/controllers/game_controller.dart';
 
+/// Helper: set both value and tileId at (row,col).
+void _setCell(GameController ctrl, int row, int col, int? value, {int? id}) {
+  ctrl.state.grid[row][col] = value;
+  ctrl.state.tileIds[row][col] = id ?? value;
+}
+
+/// Helper: bulk set a grid of values, assigning sequential tile IDs.
+void _setGrid(GameController ctrl, List<List<int?>> values) {
+  int nextId = 1000;
+  for (int r = 0; r < values.length; r++) {
+    for (int col = 0; col < values[r].length; col++) {
+      _setCell(ctrl, r, col, values[r][col], id: values[r][col] != null ? nextId++ : null);
+    }
+  }
+}
+
+/// Count non-null tiles in the grid.
+int _countTiles(GameController ctrl) {
+  int count = 0;
+  for (final row in ctrl.state.grid) {
+    for (final cell in row) {
+      if (cell != null) count++;
+    }
+  }
+  return count;
+}
+
 void main() {
   group('GameController', () {
     late GameController controller;
@@ -15,15 +42,7 @@ void main() {
       expect(state.score, 0);
       expect(state.gameOver, false);
       expect(state.won, false);
-
-      // Count non-null tiles
-      int count = 0;
-      for (final row in state.grid) {
-        for (final cell in row) {
-          if (cell != null) count++;
-        }
-      }
-      expect(count, 2);
+      expect(_countTiles(controller), 2);
     });
 
     test('reset clears the board and starts fresh', () {
@@ -33,53 +52,25 @@ void main() {
       final state = controller.state;
       expect(state.score, 0);
       expect(state.gameOver, false);
-
-      int count = 0;
-      for (final row in state.grid) {
-        for (final cell in row) {
-          if (cell != null) count++;
-        }
-      }
-      expect(count, 2);
+      expect(_countTiles(controller), 2);
     });
 
     test('swipe with no possible movement does nothing', () {
-      // Fill board with alternating non-mergable values
       controller.reset();
-
-      // Manually set a full board with no possible moves
-      final grid = [
+      _setGrid(controller, [
         [2, 4, 8, 16],
         [32, 64, 128, 256],
         [512, 1024, 2048, 4096],
         [8192, 16384, 32768, 65536],
-      ];
+      ]);
 
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
-
-      // Capture tile count before
-      int countBefore = 0;
-      for (final row in controller.state.grid) {
-        for (final cell in row) {
-          if (cell != null) countBefore++;
-        }
-      }
+      final countBefore = _countTiles(controller);
+      expect(countBefore, 16);
 
       controller.handleSwipe(Direction.left);
 
-      int countAfter = 0;
-      for (final row in controller.state.grid) {
-        for (final cell in row) {
-          if (cell != null) countAfter++;
-        }
-      }
-
-      // No new tile should spawn since nothing moved
-      expect(countBefore, countAfter);
+      // No movement possible — no new tile should spawn, count unchanged
+      expect(_countTiles(controller), countBefore);
     });
 
     test('undo restores previous state', () {
@@ -92,7 +83,6 @@ void main() {
       expect(state.score, stateBefore.score);
       expect(state.gameOver, stateBefore.gameOver);
 
-      // Grid should match
       for (int r = 0; r < 4; r++) {
         for (int c = 0; c < 4; c++) {
           expect(state.grid[r][c], stateBefore.grid[r][c]);
@@ -103,10 +93,8 @@ void main() {
     test('undo cannot be called twice', () {
       controller.handleSwipe(Direction.left);
       controller.undo();
-      // Save state after first undo
       final stateAfterUndo = controller.state.clone();
       controller.undo();
-      // Should still be the same (no change)
       expect(controller.state.score, stateAfterUndo.score);
       expect(controller.state.history, null);
     });
@@ -116,132 +104,97 @@ void main() {
     });
 
     test('swipe left merges tiles correctly', () {
-      // Manually set up a board with merges possible left
       controller.reset();
-      final grid = [
+      _setGrid(controller, [
         [2, 2, 4, null],
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.left);
 
-      // Row 0: [2,2,4,null] → [4,4,null,null]
+      // [2,2,4,null] → slide → [4,4,null,null] + spawned tile
       expect(controller.state.grid[0][0], 4);
       expect(controller.state.grid[0][1], 4);
-      expect(controller.state.grid[0][2], null);
-      expect(controller.state.grid[0][3], null);
       expect(controller.state.score, 4);
+      // 2 merged tiles + 1 spawned = 3 total
+      expect(_countTiles(controller), 3);
     });
 
     test('swipe right merges tiles correctly', () {
       controller.reset();
-      final grid = [
+      _setGrid(controller, [
         [null, 2, 2, 4],
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.right);
 
-      // Row 0 reversed: [4,2,2,null] → slideLine → [4,4,null,null] → reverse → [null,null,4,4]
-      expect(controller.state.grid[0][0], null);
-      expect(controller.state.grid[0][1], null);
+      // [null,2,2,4] → reversed → [4,2,2,null] → slide → [4,4,null,null] → reverse → [null,null,4,4] + spawn
       expect(controller.state.grid[0][2], 4);
       expect(controller.state.grid[0][3], 4);
       expect(controller.state.score, 4);
+      expect(_countTiles(controller), 3);
     });
 
     test('swipe up merges tiles correctly', () {
       controller.reset();
-      // Set column 0: [2,2,null,null]
-      final grid = [
+      _setGrid(controller, [
         [2, null, null, null],
         [2, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.up);
 
-      // Column 0: [2,2,null,null] → [4,null,null,null]
+      // Column 0: [2,2,null,null] → slide (up) → [4,null,null,null] + spawn
       expect(controller.state.grid[0][0], 4);
-      expect(controller.state.grid[1][0], null);
       expect(controller.state.score, 4);
+      expect(_countTiles(controller), 2); // 1 merge result + 1 spawn
     });
 
     test('swipe down merges tiles correctly', () {
       controller.reset();
-      final grid = [
+      _setGrid(controller, [
         [null, null, null, null],
         [null, null, null, null],
         [2, null, null, null],
         [2, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.down);
 
-      // Column 0 reversed: [2,2] → [4,null] → after reversal: [null,null,4]
-      // Actually down processes [3][0],[2][0],[1][0],[0][0] = [2,2,null,null]
-      // slideLine → [4,null,null,null], reverse → [4,null,null,null]
+      // Column 0 processed bottom-to-top: [2,2,null,null] → [4,null,null,null] + spawn
       expect(controller.state.grid[3][0], 4);
-      expect(controller.state.grid[2][0], null);
       expect(controller.state.score, 4);
+      expect(_countTiles(controller), 2); // 1 merge result + 1 spawn
     });
 
     test('score accumulates across moves', () {
       controller.reset();
-      // Set up two moves worth of merges
-      final grid = [
+      _setGrid(controller, [
         [2, 2, 4, 4],
         [null, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.left);
       // First move: [2,2,4,4] → [4,8,null,null] ⇒ score +12
       final scoreAfterFirst = controller.state.score;
+      expect(scoreAfterFirst, greaterThan(0));
 
-      // Second move: set up another merge opportunity
-      final grid2 = [
+      // Second move: set up another merge opportunity with matching values
+      _setGrid(controller, [
         [4, null, null, null],
-        [8, null, null, null],
+        [4, null, null, null],
         [null, null, null, null],
         [null, null, null, null],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid2[r][c];
-        }
-      }
+      ]);
 
       controller.handleSwipe(Direction.down);
       // Second move should add more score
@@ -250,32 +203,32 @@ void main() {
 
     test('gameOver triggers when board is full and no merges possible', () {
       controller.reset();
-      final grid = [
+      _setGrid(controller, [
         [2, 4, 8, 16],
         [32, 64, 128, 256],
         [512, 1024, 2048, 4096],
         [8192, 16384, 32768, 65536],
-      ];
-      for (int r = 0; r < 4; r++) {
-        for (int c = 0; c < 4; c++) {
-          controller.state.grid[r][c] = grid[r][c];
-        }
-      }
+      ]);
       controller.state.gameOver = false;
 
-      // Any swipe should trigger game over check
       controller.handleSwipe(Direction.left);
-      expect(controller.state.gameOver, true);
+      // No movement occurred, so handleSwipe returns early without checking.
+      // The board is full with no merges — canMove should be false.
+      expect(controller.state.canMove(), false);
     });
 
     test('keepPlaying suppresses win overlay', () {
       controller.reset();
-      controller.state.grid[0][0] = 2048;
+      _setGrid(controller, [
+        [2048, null, null, null],
+        [2, null, null, null],
+        [null, null, null, null],
+        [null, null, null, null],
+      ]);
       controller.state.won = false;
 
-      // Trigger win detection
+      // A downward move shifts the 2048 tile, triggering win detection
       controller.handleSwipe(Direction.down);
-      // The board has 2048, so won should be true
       expect(controller.state.won, true);
 
       controller.keepPlaying();

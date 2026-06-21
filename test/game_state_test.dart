@@ -3,9 +3,10 @@ import 'package:game2048/models/game_state.dart';
 
 void main() {
   group('slideLine', () {
-    test('slides tiles to the left, filling nulls on the right', () {
+    test('slides tiles to the left, merging after slide', () {
       final result = slideLine([2, null, null, 2]);
-      expect(result.line, [2, 2, null, null]);
+      // [2, null, null, 2] → filter nulls → [2,2] → merge → [4] → pad → [4, null, null, null]
+      expect(result.line, [4, null, null, null]);
       expect(result.score, 4);
       expect(result.moved, true);
     });
