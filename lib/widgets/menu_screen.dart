@@ -17,8 +17,6 @@ class _MenuScreenState extends State<MenuScreen> {
   int _bestScore = 0;
   int _gridSize = 4;
 
-  static const List<int> _sizeOptions = [4, 5, 6];
-
   @override
   void initState() {
     super.initState();

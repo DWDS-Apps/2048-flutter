@@ -34,7 +34,7 @@
 - [x] Best score persistence (save on every score change, load on init)
 - [x] Dark mode toggle (IconButton in AppBar, AppTheme light/dark)
 - [x] Dark mode persistence (save preference across restarts via file storage)
-- [x] Sound effect stubs (no-op without audioplayers package — add package and sound files for audio)
+- [x] Sound effects via audioplayers 5.2.1 (swipe, merge, new tile WAVs; dedicated AudioPlayer per sound)
 
 ## Phase 5: Nice-to-Have (est. 2-3hr) ✓
 - [x] Board size selector (4x4, 5x5, 6x6)
@@ -55,8 +55,5 @@
 - [x] Fixed missing closing parenthesis in game_board.dart GestureDetector widget tree
 
 ## Notes
-- **Offline mode:** pub.dev was unreachable during build, so external packages (shared_preferences, audioplayers, cupertino_icons, flutter_lints) were replaced with built-in alternatives:
-  - StorageService uses file-based JSON storage (`/tmp/2048_flutter_data/storage.json`)
-  - SoundService is a no-op stub (audioplayers not available)
-  - To restore sound effects: add `audioplayers: ^6.1.0` to pubspec.yaml and provide .wav files in `assets/sounds/`
+- **Sound effects:** Audioplayers 5.2.1 added via `pub.dev` with assets/sounds/{swipe,merge,new_tile}.wav. Each sound has a dedicated AudioPlayer instance for concurrent playback. Volume levels: swipe 0.5, merge 0.6, new_tile 0.4.
 - **Dart SDK:** 3.6.2 (bundled with Flutter 3.27.4)

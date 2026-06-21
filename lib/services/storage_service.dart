@@ -31,7 +31,6 @@ class StorageService {
   static const String _bestScoreKey = 'best_score';
   static const String _darkModeKey = 'dark_mode';
   static const String _leaderboardKey = 'leaderboard';
-  static const String _prefix = '2048_';
 
   String get _filePath {
     // Use a simple file path in the app's data directory
