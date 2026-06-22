@@ -180,6 +180,17 @@ class GameController extends ChangeNotifier {
     final tiles = <TileData>[];
     final mergePositions = <String>{};
 
+    // Build set of old tile IDs for O(1) lookup
+    final oldTileIds = <int>{};
+    if (_state.history != null) {
+      for (int r = 0; r < _gridSize; r++) {
+        for (int c = 0; c < _gridSize; c++) {
+          final hid = _state.history!.tileIds[r][c];
+          if (hid != null) oldTileIds.add(hid);
+        }
+      }
+    }
+
     // Detect merge positions by comparing with history
     if (_state.history != null) {
       for (int r = 0; r < _gridSize; r++) {
@@ -196,8 +207,9 @@ class GameController extends ChangeNotifier {
               }
             } else if (histVal == null) {
               // This cell was empty in history — only flag as merge if it has
-              // a value now AND isn't the newly spawned tile
-              if (!isNewTile || !_isNewTilePosition(r, c)) {
+              // a value now AND the tile ID existed before the move
+              // (i.e., it was created by a merge, not by the random spawn)
+              if (!isNewTile || oldTileIds.contains(curId)) {
                 mergePositions.add('$r,$c');
               }
             }
@@ -211,7 +223,7 @@ class GameController extends ChangeNotifier {
         final v = _state.grid[r][c];
         final id = _state.tileIds[r][c];
         if (v != null && id != null) {
-          final isNew = isNewTile && _isNewTilePosition(r, c);
+          final isNew = isNewTile && !oldTileIds.contains(id);
           final isMerged = mergePositions.contains('$r,$c') && !isNew;
           tiles.add(TileData(
             id: id,
@@ -226,24 +238,6 @@ class GameController extends ChangeNotifier {
     }
 
     _state.renderTiles = tiles;
-  }
-
-  bool _isNewTilePosition(int r, int c) {
-    if (_state.history == null) return true;
-    // The tile at (r,c) is "new" if that cell was empty before the move
-    if (_state.history!.grid[r][c] == null) {
-      // But also check: was this tile created by a merge? If yes, it's not "new"
-      final curId = _state.tileIds[r][c];
-      if (curId == null) return false;
-      // A truly new tile has a brand-new ID that doesn't appear anywhere in old tileIds
-      for (int hr = 0; hr < _gridSize; hr++) {
-        for (int hc = 0; hc < _gridSize; hc++) {
-          if (_state.history!.tileIds[hr][hc] == curId) return false;
-        }
-      }
-      return true;
-    }
-    return false;
   }
 
   void undo() {

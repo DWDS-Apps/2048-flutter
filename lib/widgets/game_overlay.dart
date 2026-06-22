@@ -21,10 +21,14 @@ class GameOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!won && !gameOver) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Positioned.fill(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.5),
+          color: isDark
+              ? const Color(0xFF1a1a2e).withValues(alpha: 0.75)
+              : Colors.black.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Column(
@@ -32,8 +36,8 @@ class GameOverlay extends StatelessWidget {
           children: [
             Text(
               won ? 'You Win!' : 'Game Over',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isDark ? const Color(0xFFeee4da) : Colors.white,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
@@ -41,8 +45,8 @@ class GameOverlay extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               '$score',
-              style: const TextStyle(
-                color: Color(0xFFeee4da),
+              style: TextStyle(
+                color: isDark ? const Color(0xFFcdc1b4) : const Color(0xFFeee4da),
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -64,8 +68,8 @@ class GameOverlay extends StatelessWidget {
             ElevatedButton(
               onPressed: onNewGame,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppTheme.darkText,
+                backgroundColor: isDark ? AppTheme.darkCellBackground : Colors.white,
+                foregroundColor: isDark ? const Color(0xFFeee4da) : AppTheme.darkText,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text('New Game', style: TextStyle(fontWeight: FontWeight.bold)),

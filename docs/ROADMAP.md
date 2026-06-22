@@ -53,7 +53,16 @@
 - [x] Fixed broken test expectations in game_state_test.dart (slideLine merge behavior)
 - [x] Fixed broken controller tests — tests now properly set tileIds alongside grid values
 - [x] Fixed missing closing parenthesis in game_board.dart GestureDetector widget tree
+- [x] Fixed GameOverlay hardcoded light-theme colors — adapts to dark mode now (background, text, buttons)
+- [x] Fixed duplicate leaderboard entry on game-over + New Game sequence (added _scoreSavedForCurrentGame flag)
+- [x] Fixed game-over detection test to exercise the actual code path (valid move → full board → gameOver=true)
+- [x] Fixed `_isNewTilePosition` O(n²) → O(1) with Set lookup for old tile IDs
+- [x] Added sound toggle UI button (speaker icon) with persistence in StorageService
+- [x] Added Ctrl+Z (undo) and Ctrl+N (new game) keyboard shortcuts for web/desktop
+- [x] Removed unused `mergeGroup` field from TileData
+- [x] Removed unused `bestScore` prop from ScoreBoard constructor
 
 ## Notes
-- **Sound effects:** Audioplayers 5.2.1 added via `pub.dev` with assets/sounds/{swipe,merge,new_tile}.wav. Each sound has a dedicated AudioPlayer instance for concurrent playback. Volume levels: swipe 0.5, merge 0.6, new_tile 0.4.
+- **Sound effects:** Audioplayers 5.2.1 added via `pub.dev` with assets/sounds/{swipe,merge,new_tile}.wav. Each sound has a dedicated AudioPlayer instance for concurrent playback. Volume levels: swipe 0.5, merge 0.6, new_tile 0.4. Sound can be toggled on/off via speaker icon in the game AppBar; preference persists across restarts.
+- **Keyboard shortcuts:** Arrow keys for moves, Ctrl+Z for undo, Ctrl+N for new game (web/desktop).
 - **Dart SDK:** 3.6.2 (bundled with Flutter 3.27.4)

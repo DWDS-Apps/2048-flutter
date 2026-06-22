@@ -31,6 +31,7 @@ class StorageService {
   static const String _bestScoreKey = 'best_score';
   static const String _darkModeKey = 'dark_mode';
   static const String _leaderboardKey = 'leaderboard';
+  static const String _soundEnabledKey = 'sound_enabled';
 
   String get _filePath {
     // Use a simple file path in the app's data directory
@@ -101,6 +102,17 @@ class StorageService {
     final top = entries.take(5).toList();
     final data = _readAll();
     data[_leaderboardKey] = jsonEncode(top.map((e) => e.toJson()).toList());
+    _writeAll(data);
+  }
+
+  Future<bool> loadSoundEnabled() async {
+    final data = _readAll();
+    return data[_soundEnabledKey] as bool? ?? true;
+  }
+
+  Future<void> saveSoundEnabled(bool enabled) async {
+    final data = _readAll();
+    data[_soundEnabledKey] = enabled;
     _writeAll(data);
   }
 }

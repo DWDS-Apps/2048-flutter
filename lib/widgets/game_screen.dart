@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../controllers/game_controller.dart';
 import '../models/game_state.dart';
 import '../services/storage_service.dart';
@@ -30,18 +31,31 @@ class _GameScreenState extends State<GameScreen> {
   final StorageService _storage = StorageService();
   final SoundService _soundService = SoundService();
   bool _animating = false;
+  bool _scoreSavedForCurrentGame = false;
+  bool _soundEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _controller = GameController(gridSize: widget.gridSize);
     _loadBestScore();
+    _loadSoundPref();
   }
 
   @override
   void dispose() {
     _soundService.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSoundPref() async {
+    final enabled = await _storage.loadSoundEnabled();
+    if (mounted) {
+      setState(() {
+        _soundEnabled = enabled;
+        _soundService.setEnabled(enabled);
+      });
+    }
   }
 
   Future<void> _loadBestScore() async {
@@ -89,6 +103,7 @@ class _GameScreenState extends State<GameScreen> {
     // Save to leaderboard on game over if score > 0
     if (_controller.state.gameOver && _controller.state.score > 0) {
       _saveToLeaderboard();
+      _scoreSavedForCurrentGame = true;
     }
     Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) {
@@ -110,13 +125,22 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  void _toggleSound() {
+    setState(() {
+      _soundEnabled = !_soundEnabled;
+      _soundService.setEnabled(_soundEnabled);
+    });
+    _storage.saveSoundEnabled(_soundEnabled);
+  }
+
   void _resetGame() {
-    // Save to leaderboard before reset if score > 0
-    if (_controller.state.score > 0) {
+    // Save to leaderboard before reset if score > 0 and not already saved
+    if (_controller.state.score > 0 && !_scoreSavedForCurrentGame) {
       // Fire-and-forget — save completes in background
       _saveToLeaderboard();
     }
     _controller.reset();
+    _scoreSavedForCurrentGame = false;
     _saveBestScore();
   }
 
@@ -149,6 +173,10 @@ class _GameScreenState extends State<GameScreen> {
                 },
               ),
               IconButton(
+                icon: Icon(_soundEnabled ? Icons.volume_up : Icons.volume_off),
+                onPressed: _toggleSound,
+              ),
+              IconButton(
                 icon: Icon(widget.isDark ? Icons.light_mode : Icons.dark_mode),
                 onPressed: widget.onToggleTheme,
               ),
@@ -156,14 +184,21 @@ class _GameScreenState extends State<GameScreen> {
           ),
           body: Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
+            child: CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.keyZ, control: true): _undo,
+                const SingleActivator(LogicalKeyboardKey.keyN, control: true): _resetGame,
+              },
+              child: Focus(
+                autofocus: true,
+                child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ScoreBoard(score: state.score, bestScore: state.bestScore, label: 'Score'),
+                    ScoreBoard(score: state.score, label: 'Score'),
                     const SizedBox(width: 16),
-                    ScoreBoard(score: state.bestScore, bestScore: state.bestScore, label: 'Best'),
+                    ScoreBoard(score: state.bestScore, label: 'Best'),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -194,13 +229,15 @@ class _GameScreenState extends State<GameScreen> {
                           onNewGame: _resetGame,
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+                    ),   // Stack
+                  ),   // AspectRatio
+                ),   // Expanded
+              ],   // Column children
+            ),   // Column
+          ),   // Focus
+        ),   // CallbackShortcuts
+      ),   // body: Padding
+    );
       },
     );
   }

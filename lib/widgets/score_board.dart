@@ -3,13 +3,11 @@ import '../themes/app_theme.dart';
 
 class ScoreBoard extends StatefulWidget {
   final int score;
-  final int bestScore;
   final String label;
 
   const ScoreBoard({
     super.key,
     required this.score,
-    required this.bestScore,
     this.label = 'Score',
   });
 

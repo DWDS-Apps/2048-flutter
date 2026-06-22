@@ -203,18 +203,23 @@ void main() {
 
     test('gameOver triggers when board is full and no merges possible', () {
       controller.reset();
+      // Set up a board where one move is possible (row 3 shifts left),
+      // and after the move + new tile spawn the board is full with no
+      // adjacent equals, exercising the actual game-over code path.
       _setGrid(controller, [
         [2, 4, 8, 16],
         [32, 64, 128, 256],
         [512, 1024, 2048, 4096],
-        [8192, 16384, 32768, 65536],
+        [null, 8192, 16384, 32768],
       ]);
-      controller.state.gameOver = false;
 
       controller.handleSwipe(Direction.left);
-      // No movement occurred, so handleSwipe returns early without checking.
-      // The board is full with no merges — canMove should be false.
-      expect(controller.state.canMove(), false);
+
+      // Row 3: [null,8192,16384,32768] → [8192,16384,32768,null]
+      // New tile spawns at [3][3]. Since 4096 != 2/4 and 32768 != 2/4,
+      // no adjacent equals exist → gameOver = true
+      expect(controller.state.gameOver, isTrue);
+      expect(controller.state.canMove(), isFalse);
     });
 
     test('keepPlaying suppresses win overlay', () {

@@ -5,7 +5,6 @@ class TileData {
   final int col;
   final bool isNew;
   final bool isMerged;
-  final int mergeGroup;
 
   const TileData({
     required this.id,
@@ -14,7 +13,6 @@ class TileData {
     required this.col,
     this.isNew = false,
     this.isMerged = false,
-    this.mergeGroup = 0,
   });
 
   TileData copyWith({
@@ -24,7 +22,6 @@ class TileData {
     int? col,
     bool? isNew,
     bool? isMerged,
-    int? mergeGroup,
   }) {
     return TileData(
       id: id ?? this.id,
@@ -33,7 +30,6 @@ class TileData {
       col: col ?? this.col,
       isNew: isNew ?? this.isNew,
       isMerged: isMerged ?? this.isMerged,
-      mergeGroup: mergeGroup ?? this.mergeGroup,
     );
   }
 }
