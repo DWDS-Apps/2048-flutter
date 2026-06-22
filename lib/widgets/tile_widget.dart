@@ -43,7 +43,7 @@ class _TileWidgetState extends State<TileWidget>
       _scaleAnim = TweenSequence<double>([
         TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.15), weight: 40),
         TweenSequenceItem(tween: Tween<double>(begin: 1.15, end: 1.0), weight: 40),
-      ]).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+      ]).animate(_controller);
       _controller.forward();
     } else {
       _scaleAnim = Tween<double>(begin: 1.0, end: 1.0).animate(
@@ -60,7 +60,7 @@ class _TileWidgetState extends State<TileWidget>
       _scaleAnim = TweenSequence<double>([
         TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.15), weight: 40),
         TweenSequenceItem(tween: Tween<double>(begin: 1.15, end: 1.0), weight: 40),
-      ]).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+      ]).animate(_controller);
       _controller.forward();
     } else if (!oldWidget.isNew && widget.isNew) {
       _controller.reset();
