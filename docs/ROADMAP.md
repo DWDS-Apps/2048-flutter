@@ -61,6 +61,7 @@
 - [x] Added Ctrl+Z (undo) and Ctrl+N (new game) keyboard shortcuts for web/desktop
 - [x] Removed unused `mergeGroup` field from TileData
 - [x] Removed unused `bestScore` prop from ScoreBoard constructor
+- [x] Fixed game_board_layout_test.dart record types (double?), closeTo usage, unused variables, and ValueKey type assertion
 
 ## Notes
 - **Sound effects:** Audioplayers 5.2.1 added via `pub.dev` with assets/sounds/{swipe,merge,new_tile}.wav. Each sound has a dedicated AudioPlayer instance for concurrent playback. Volume levels: swipe 0.5, merge 0.6, new_tile 0.4. Sound can be toggled on/off via speaker icon in the game AppBar; preference persists across restarts.

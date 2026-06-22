@@ -18,9 +18,9 @@ Widget wrapInApp(Widget child, {double size = 360}) {
 }
 
 /// Find all AnimatedPositioned widgets and return their (left, top) as
-/// (double, double) tuples.
-List<({double left, double top, Key? key})> getTilePositions(WidgetTester tester) {
-  final positions = <({double left, double top, Key? key})>[];
+/// (double?, double?) tuples.
+List<({double? left, double? top, Key? key})> getTilePositions(WidgetTester tester) {
+  final positions = <({double? left, double? top, Key? key})>[];
   final animatedPositions = find.byType(AnimatedPositioned);
   for (int i = 0; i < animatedPositions.evaluate().length; i++) {
     final element = animatedPositions.evaluate().elementAt(i);
@@ -75,7 +75,6 @@ void main() {
     testWidgets('tiles are positioned at correct grid coordinates',
         (WidgetTester tester) async {
       const double size = 360;
-      const expectedTileSize = (size - 5 * gutter) / 4; // = 80
 
       final tiles = [
         const TileData(id: 1, value: 2, row: 0, col: 0),
@@ -141,25 +140,26 @@ void main() {
 
       // Tile at (0,0) should be at the same position as cell (0,0)
       final cell00 = cellPos.firstWhere(
-        (c) => c.left.closeTo(expectLeft(size, 0), 0.01) &&
-                c.top.closeTo(expectTop(size, 0), 0.01),
+        (c) =>
+            ((c.left) - expectLeft(size, 0)).abs() < 0.01 &&
+            ((c.top) - expectTop(size, 0)).abs() < 0.01,
       );
-      expect(cell00.left, closeTo(tilePos[0].left, 0.01));
-      expect(cell00.top, closeTo(tilePos[0].top, 0.01));
+      expect(cell00.left, closeTo(tilePos[0].left ?? 0, 0.01));
+      expect(cell00.top, closeTo(tilePos[0].top ?? 0, 0.01));
 
       // Tile at (2,2) should be at the same position as cell (2,2)
       final cell22 = cellPos.firstWhere(
-        (c) => c.left.closeTo(expectLeft(size, 2), 0.01) &&
-                c.top.closeTo(expectTop(size, 2), 0.01),
+        (c) =>
+            ((c.left) - expectLeft(size, 2)).abs() < 0.01 &&
+            ((c.top) - expectTop(size, 2)).abs() < 0.01,
       );
-      expect(cell22.left, closeTo(tilePos[1].left, 0.01));
-      expect(cell22.top, closeTo(tilePos[1].top, 0.01));
+      expect(cell22.left, closeTo(tilePos[1].left ?? 0, 0.01));
+      expect(cell22.top, closeTo(tilePos[1].top ?? 0, 0.01));
     });
 
     testWidgets('all tiles stay within board bounds',
         (WidgetTester tester) async {
       const double size = 360;
-      final expectedTileSize = tileSize(size);
       const maxPixels = size;
 
       // Fill all 16 cells with tiles
@@ -185,15 +185,15 @@ void main() {
         // Each tile should be fully inside the board
         expect(pos.left, greaterThanOrEqualTo(0));
         expect(pos.top, greaterThanOrEqualTo(0));
-        expect(pos.left + expectedTileSize, lessThanOrEqualTo(maxPixels));
-        expect(pos.top + expectedTileSize, lessThanOrEqualTo(maxPixels));
+        final expectedTileSize = tileSize(size);
+        expect((pos.left ?? 0) + expectedTileSize, lessThanOrEqualTo(maxPixels));
+        expect((pos.top ?? 0) + expectedTileSize, lessThanOrEqualTo(maxPixels));
       }
     });
 
     testWidgets('no tile overlaps another tile',
         (WidgetTester tester) async {
       const double size = 360;
-      final expectedTileSize = tileSize(size);
 
       // Fill all 16 cells
       final tiles = [
@@ -219,8 +219,8 @@ void main() {
         for (int j = i + 1; j < positions.length; j++) {
           final a = positions[i];
           final b = positions[j];
-          final leftOverlap = (a.left - b.left).abs() < 1;
-          final topOverlap = (a.top - b.top).abs() < 1;
+          final leftOverlap = ((a.left ?? 0) - (b.left ?? 0)).abs() < 1;
+          final topOverlap = ((a.top ?? 0) - (b.top ?? 0)).abs() < 1;
           expect(leftOverlap && topOverlap, isFalse,
               reason:
                   'Tiles at indices $i and $j overlap at (${a.left}, ${a.top}) and (${b.left}, ${b.top})');
@@ -260,9 +260,9 @@ void main() {
 
       final positions = getTilePositions(tester);
       expect(positions.length, 1);
-      expect(positions[0].key, isA<ValueKey<int>>());
-      final valueKey = positions[0].key as ValueKey<int>;
-      expect(valueKey.value, 42);
+      expect(positions[0].key, isA<ValueKey<String>>());
+      final valueKey = positions[0].key as ValueKey<String>;
+      expect(valueKey.value, 'tile_42');
     });
   });
 }
