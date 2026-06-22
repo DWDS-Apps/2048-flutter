@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../themes/app_theme.dart';
 import '../services/storage_service.dart';
+import 'game_screen.dart';
 import 'leaderboard_screen.dart';
 
 class MenuScreen extends StatefulWidget {
-  final void Function(int gridSize) onPlay;
+  final VoidCallback onToggleTheme;
+  final bool isDark;
 
-  const MenuScreen({super.key, required this.onPlay});
+  const MenuScreen({super.key, required this.onToggleTheme, required this.isDark});
 
   @override
   State<MenuScreen> createState() => _MenuScreenState();
@@ -26,6 +28,19 @@ class _MenuScreenState extends State<MenuScreen> {
   Future<void> _loadBestScore() async {
     final score = await _storage.loadBestScore();
     if (mounted) setState(() => _bestScore = score);
+  }
+
+  void _startGame() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GameScreen(
+          onToggleTheme: widget.onToggleTheme,
+          isDark: widget.isDark,
+          gridSize: _gridSize,
+        ),
+      ),
+    );
   }
 
   @override
@@ -84,7 +99,7 @@ class _MenuScreenState extends State<MenuScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton(
-              onPressed: () => widget.onPlay(_gridSize),
+              onPressed: _startGame,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.boardBackground,
                 foregroundColor: Colors.white,
