@@ -70,7 +70,6 @@ class GameBoard extends StatelessWidget {
                   : AppTheme.boardBackground,
               borderRadius: BorderRadius.circular(6),
             ),
-            padding: EdgeInsets.all(gutter),
             child: Stack(
               children: [
                 // Grid background cells
