@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../themes/app_theme.dart';
 
-class ScoreBoard extends StatelessWidget {
+class ScoreBoard extends StatefulWidget {
   final int score;
   final int bestScore;
   final String label;
@@ -14,9 +14,30 @@ class ScoreBoard extends StatelessWidget {
   });
 
   @override
+  State<ScoreBoard> createState() => _ScoreBoardState();
+}
+
+class _ScoreBoardState extends State<ScoreBoard> {
+  int _previousScore = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousScore = widget.score;
+  }
+
+  @override
+  void didUpdateWidget(ScoreBoard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.score != widget.score) {
+      _previousScore = oldWidget.score;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bool isBest = label == 'Best';
+    final bool isBest = widget.label == 'Best';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -28,7 +49,7 @@ class ScoreBoard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            label,
+            widget.label,
             style: const TextStyle(
               color: Color(0xFFeee4da),
               fontSize: 11,
@@ -38,7 +59,7 @@ class ScoreBoard extends StatelessWidget {
           ),
           if (isBest)
             Text(
-              '$score',
+              '${widget.score}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -47,7 +68,7 @@ class ScoreBoard extends StatelessWidget {
             )
           else
             TweenAnimationBuilder<int>(
-              tween: IntTween(begin: score, end: score),
+              tween: IntTween(begin: _previousScore, end: widget.score),
               duration: const Duration(milliseconds: 200),
               builder: (context, value, child) {
                 return Text(

@@ -14,7 +14,7 @@ A feature-rich clone of the classic **2048 puzzle game** built with Flutter. Sli
 - Single-level undo
 
 ### Persistence
-- Best score saved across sessions via SharedPreferences
+- Best score saved across sessions via file-based persistence
 - Dark/light theme toggle with persisted preference
 - Local leaderboard (top 5 scores saved by date and grid size)
 
@@ -120,7 +120,7 @@ flutter test
 
 - **Framework:** Flutter (Dart)
 - **State Management:** ChangeNotifier + ListenableBuilder (zero dependencies)
-- **Persistence:** SharedPreferences
+- **Persistence:** File-based JSON storage
 - **Audio:** audioplayers
 
 ## License
