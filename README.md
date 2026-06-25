@@ -75,6 +75,26 @@ flutter build web
 flutter build linux
 ```
 
+### Android Play Store Release Signing
+
+Play Console rejects debug-signed artifacts. Configure a release keystore once:
+
+```bash
+# from project root
+keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+cp android/key.properties.example android/key.properties
+```
+
+Then update android/key.properties with real passwords and verify storeFile path.
+
+Build signed release artifacts:
+
+```bash
+flutter build appbundle --release
+# or
+flutter build apk --release
+```
+
 ## How to Play
 
 1. **Start** — Tap "Play" on the menu screen. Optionally select a board size first.
