@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:game2048/models/game_state.dart';
+import 'package:merge_up_2048/models/game_state.dart';
 
 void main() {
   group('slideLine', () {

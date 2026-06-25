@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:game2048/models/game_state.dart';
-import 'package:game2048/widgets/game_board.dart';
+import 'package:merge_up_2048/models/game_state.dart';
+import 'package:merge_up_2048/widgets/game_board.dart';
 
 /// Wraps a widget in a MaterialApp + fixed-size container so LayoutBuilder
 /// has known constraints.

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:game2048/app.dart';
+import 'package:merge_up_2048/app.dart';
 
 void main() {
   testWidgets('App renders menu screen', (WidgetTester tester) async {

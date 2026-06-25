@@ -8,7 +8,7 @@
 PRODUCT_NAME = game2048
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.game2048
+PRODUCT_BUNDLE_IDENTIFIER = com.dwds.merge_up_2048
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.

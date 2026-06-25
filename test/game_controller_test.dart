@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:game2048/models/game_state.dart';
-import 'package:game2048/controllers/game_controller.dart';
+import 'package:merge_up_2048/models/game_state.dart';
+import 'package:merge_up_2048/controllers/game_controller.dart';
 
 /// Helper: set both value and tileId at (row,col).
 void _setCell(GameController ctrl, int row, int col, int? value, {int? id}) {
