@@ -39,6 +39,7 @@ class _GameAppState extends State<GameApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: '2048',
       theme: _darkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
       home: _loaded
